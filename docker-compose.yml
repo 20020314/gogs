@@ -1,0 +1,28 @@
+version: "3"
+services:
+  gogs:
+    image: traefik/gogs
+    labels:
+      - traefik.docker.network=traefik_default
+      - traefik.http.services.gogs.loadbalancer.server.port=80
+      # 下面未注释的 1 行与原来不同
+      # 在名为 gogs 的 route 下，将 rule 设置为 "Host(`gogs.elysia.li`)"
+      - traefik.http.routers.gogs.rule=Host(`gogs.elysia.li`)
+      - traefik.http.routers.gogs.service=gogs
+      # 下面未注释的 5 行是新增的内容
+      # 在名为 gogs 的 route 下，将 entrypoint 设置为 "web"
+      - traefik.http.routers.gogs.entrypoints=web
+      # 声明一个名为 gogs-secured 的 route
+      # 在名为 gogs-secured 的 route 下，将 rule 设置为 "Host(`gogs.elysia.li`)"
+      - traefik.http.routers.gogs-secured.rule=Host(`gogs.elysia.li`)
+      # 在名为 gogs-secured 的 route 下，将 service 设置为 "Host(`gogs.elysia.li`)"
+      - traefik.http.routers.gogs-secured.service=gogs
+      # 在名为 gogs-secured 的 route 下，将 tls 设置 true
+      - traefik.http.routers.gogs-secured.tls
+      # 在名为 gogs-secured 的 route 下，将 entrypoint 设置为 websecure
+      - traefik.http.routers.gogs-secured.entrypoints=websecure
+    networks:
+      - traefik_default
+networks:
+  traefik_default:
+    external: true
